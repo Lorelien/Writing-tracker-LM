@@ -31,3 +31,15 @@ document.querySelector('.days').addEventListener('click', function(event) {
         event.target.classList.toggle('active');
     }
 });
+
+function markDayFilled(date) {
+    const days = document.querySelectorAll('.days div');
+    days.forEach(day => {
+        if (day.textContent === date.getDate().toString()) {
+            day.classList.add('filled');
+        }
+    });
+}
+
+// Bijvoorbeeld, als vandaag gevuld wordt:
+markDayFilled(new Date());
