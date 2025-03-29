@@ -26,3 +26,10 @@ document.querySelectorAll('.book-icon').forEach(icon => {
         this.classList.add('active');
     });
 });
+
+const urlParams = new URLSearchParams(window.location.search);
+const selectedDate = urlParams.get('date');
+if (selectedDate) {
+    console.log(`Geselecteerde datum: ${selectedDate}`);
+    // Je kunt de geselecteerde datum hier gebruiken
+}

@@ -205,3 +205,9 @@ body {
     text-align: center;
   }
         
+
+  .days div.filled {
+    background-color: #6aaf6f; /* Groen tint voor aangeduide dagen */
+    color: white;
+    font-weight: bold;
+}
