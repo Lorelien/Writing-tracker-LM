@@ -43,3 +43,39 @@ function markDayFilled(date) {
 
 // Bijvoorbeeld, als vandaag gevuld wordt:
 markDayFilled(new Date());
+
+function saveDataForDate(date, data) {
+    const savedData = JSON.parse(localStorage.getItem('writingData')) || {};
+    savedData[date] = data;
+    localStorage.setItem('writingData', JSON.stringify(savedData));
+}
+
+function getDataForDate(date) {
+    const savedData = JSON.parse(localStorage.getItem('writingData')) || {};
+    return savedData[date] || null;
+}
+
+document.querySelectorAll('.days div').forEach(day => {
+    day.addEventListener('click', function() {
+        if (day.classList.contains('filled')) {
+            const date = `2025-03-${day.textContent.padStart(2, '0')}`;
+            const data = getDataForDate(date);
+            if (data) {
+                alert(`Boek: ${data.book}\nWoorden: ${data.words}\nHoofdstukken: ${data.chapters}`);
+                // Of toon een modaal/pagina met deze informatie
+            }
+        }
+    });
+});
+
+function loadFilledDays() {
+    const savedData = JSON.parse(localStorage.getItem('writingData')) || {};
+    Object.keys(savedData).forEach(date => {
+        const [year, month, day] = date.split('-');
+        if (year === '2025' && month === '03') { // Controleer op huidige maand/jaar
+            markDayFilled(new Date(year, month - 1, day));
+        }
+    });
+}
+
+loadFilledDays();
