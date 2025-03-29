@@ -1,9 +1,17 @@
 export default class Book {
     constructor(title, about, emoji) {
-        this.id = Date.now().toString(); //unieke id 
-        this.title = title; 
-        this.about = about; 
-        this.emoji = emoji; 
-        this.logs = []; 
+        this.title = title;
+        this.about = about;
+        this.emoji = emoji;
+        this.totalWords = 0;
+        this.totalChapters = 0;
+    } 
+
+    addWriting(words, chapters) {
+        this.totalWords += words;
+        this.totalChapters += chapters;
     }
-}
+}; 
+
+
+
