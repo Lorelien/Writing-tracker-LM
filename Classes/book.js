@@ -11,7 +11,7 @@ export default class Book {
         this.totalWords += words;
         this.totalChapters += chapters;
     }
-}; 
+}
 
 
 
