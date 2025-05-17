@@ -1,118 +1,73 @@
+/* Algemene opmaak */
 body {
-    background-color: #2c1c45;
-    font-family: 'IM FELL English SC';
+    background-color: #2c1c45; /* Donkere achtergrondkleur zoals eerder */
+    font-family: 'IM FELL English SC', serif;
     color: #fff;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     height: 100vh;
     margin: 0;
-  }
+}
 
-  .container {
-    width: 320px;
-    background-color: #4b306a;
+/* Container voor alle inhoud */
+.container {
+    width: 350px;
+    background-color: #4b306a; /* Paars getint zoals je originele stijl */
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  }
-
-  h1 {
     text-align: center;
-    font-size: 20px;
-    margin-bottom: 0;
-    margin-top:150px;
-  }
-
-.calendar {
-    width: 100%;
-    height: auto;
-    background: none; /* Geen afbeelding meer */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
 }
 
-/* 
-  .calendar table {
-    border-collapse: collapse;
-  }
+/* Kalender */
+.calendar {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-  .calendar td {
+/* Maand- en jaar-selectie */
+.month-selector {
     display: flex;
     justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    background-color: #f9f9f9;
-    border-radius: 50%;
-    border: 1px solid #ccc;
-  }
-
-  .calender tr {
-   padding: 10px;
-  } */
-
-  /* .calendar {
-    background-color: #f0f0f0;
-    background-image: url(/Images/Boek.png);
-    border-radius: 20px;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 2px solid #d2e6ff;
-  } */
-  
-  .month-selector {
-    display: flex;
-    flex-direction: row;
-    /* justify-content: flex-end; */
-    margin-bottom: 10px;
-    align-items: center;
     gap: 10px;
-  }
-  
-  .month-selector select {
+    margin-bottom: 10px;
+}
+
+.month-selector select {
     background-color: #f0f8ff;
     border: none;
     border-radius: 20px;
-    padding: 8px 16px;
-    color: #bdbdbd;
-    cursor: pointer;
-    font-family: "Outfit";
+    padding: 6px 12px;
     font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    appearance: none; 
-    -webkit-appearance: none; 
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='8' viewBox='0 0 8 6' fill='none'%3E%3Cpath d='M0.949707 1.5L4.01304 4.5L7.07637 1.5' stroke='%23BDBDBD' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); 
-    background-repeat: no-repeat;
-    background-position: right 10px top 50%;
-    padding-right: 30px; 
-  }
-  .days {
+    cursor: pointer;
+}
+
+/* Correcte uitlijning van dagen */
+.days {
     display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 gelijke kolommen */
-    grid-template-rows: repeat(4, 1fr); /* 6 rijen om alle dagen te laten passen */
-    gap: 1px; /* Kleine ruimte tussen de cellen */
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
+    grid-template-columns: repeat(7, 1fr); /* 7 kolommen */
+    grid-template-rows: repeat(5, 1fr); /* 5 rijen */
+    gap: 4px; /* Kleiner voor een strakker uiterlijk */
     width: 100%;
-    max-width: 320px;
 }
 
 .days div {
-    width: 40px;
-    height: 40px;
-    background-color: rgba(255, 255, 255, 0.9);
+    width: 35px;
+    height: 35px;
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 6px;
     font-size: 1em;
     display: flex;
     justify-content: center;
     align-items: center;
+    color: #2c1c45; /* Donkerder tekst zodat het goed zichtbaar blijft */
 }
 
 .days div.active {
@@ -121,66 +76,67 @@ body {
     font-weight: bold;
 }
 
-
-  
-
-  .weekly-writing {
+/* Weekly writing progress */
+.weekly-writing {
     margin-top: 16px;
-  }
+}
 
-  .progress-bar {
+.progress-bar {
     background-color: #ccc;
     height: 40px;
     border-radius: 10px;
     overflow: hidden;
-  }
+}
 
-  .progress-bar .fill {
+.progress-bar .fill {
     width: 28%; /* 2/7 dagen */
     height: 100%;
     background-color: #5a2758;
-  }
+}
 
-  .book-of-the-month, .my-activity {
+/* Book of the month */
+.book-of-the-month, .my-activity {
     margin-top: 16px;
-  }
+}
 
-  .book-info {
+.book-info {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
-  }
+}
 
-  .book-info img {
+.book-info img {
     width: 40px;
     height: 40px;
-  }
+}
 
-  .stats {
+.stats {
     font-size: 14px;
-  }
+}
 
-  .activity-icons {
+/* Activiteitensymbolen */
+.activity-icons {
     display: flex;
     gap: 8px;
     margin-top: 8px;
     justify-content: center;
-  }
+}
 
-  .activity-icons img {
+.activity-icons img {
     width: 32px;
     height: 32px;
-  }
+}
 
-  .total-stats-words {
+/* Total writing stats */
+.total-stats {
     margin-top: 16px;
-  }
+}
 
-  .total-stats-words {
+.total-stats-words, .total-stats-chapters {
     display: flex;
     flex-direction: row;
-    gap: 72%;
+    justify-content: space-between;
     background-color: #ddd;
     color: #000;
     padding: 10px;
@@ -188,28 +144,5 @@ body {
     margin-bottom: 8px;
     font-size: 14px;
     text-align: center;
-  }
-
-  .total-stats-chapters {
-    margin-top: 16px;
-  }
-
-  .total-stats-chapters {
-    display: flex;
-    flex-direction: row;
-    gap: 75%;
-    background-color: #ddd;
-    color: #000;
-    padding: 10px;
-    border-radius: 6px;
-    margin-bottom: 8px;
-    font-size: 14px;
-    text-align: center;
-  }
-        
-
-  .days div.filled {
-    background-color: #6aaf6f; /* Groen tint voor aangeduide dagen */
-    color: white;
-    font-weight: bold;
+    width: 100%;
 }
