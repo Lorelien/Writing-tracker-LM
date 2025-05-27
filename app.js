@@ -393,7 +393,7 @@ if (path.includes('boek.html')) {
     if (emojiInput) {
         // Kies zelf je favoriete emoji's of voeg meer toe
         const emojiList = [
-            "😈", "👻", "👑", "🐺", "💧", "💤", "🦄", "📚", "🔥", "🌙", "⭐", "🦊", "🦋"
+            "😈", "👻", "👑", "🐺", "💧", "💤", "🦄", "📚", "🔥", "🌙", "⭐", "🦊", "🦋", "⛅"
         ];
         const emojiPicker = document.createElement('div');
         emojiPicker.style.display = 'flex';
