@@ -386,3 +386,52 @@ else if (path.includes('boek.html')) {
         window.location.href = "vandaag.html";
     });
 }
+
+if (path.includes('boek.html')) {
+    // Emoji-voorstelrij toevoegen onder het emoji-invoerveld
+    const emojiInput = document.getElementById('emoji');
+    if (emojiInput) {
+        // Kies zelf je favoriete emoji's of voeg meer toe
+        const emojiList = [
+            "😈", "👻", "👑", "🐺", "💧", "💤", "🦄", "📚", "🔥", "🌙", "⭐", "🦊", "🦋"
+        ];
+        const emojiPicker = document.createElement('div');
+        emojiPicker.style.display = 'flex';
+        emojiPicker.style.flexWrap = 'wrap';
+        emojiPicker.style.gap = '8px';
+        emojiPicker.style.margin = '8px 0 16px 0';
+
+        emojiList.forEach(emoji => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = emoji;
+            btn.style.fontSize = '24px';
+            btn.style.background = '#fff';
+            btn.style.border = '1px solid #ccc';
+            btn.style.borderRadius = '5px';
+            btn.style.cursor = 'pointer';
+            btn.style.padding = '4px 8px';
+            btn.addEventListener('click', () => {
+                emojiInput.value = emoji;
+            });
+            emojiPicker.appendChild(btn);
+        });
+
+        emojiInput.parentNode.insertBefore(emojiPicker, emojiInput.nextSibling);
+    }
+
+    // Boek toevoegen
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const title = document.getElementById('title').value.trim();
+        const about = document.getElementById('about').value.trim();
+        const emoji = document.getElementById('emoji').value.trim();
+
+        if (!title) return alert("Geef een titel op!");
+        if (!emoji) return alert("Voeg een emoji toe!");
+
+        tracker.addBook(title, about, emoji);
+        alert('Boek toegevoegd!');
+        window.location.href = "vandaag.html";
+    });
+}
