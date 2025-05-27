@@ -341,3 +341,38 @@ if (path.includes('index.html') || path.endsWith('/')) {
         window.location.href = "vandaag.html";
     });
 }
+
+// Voeg standaardboeken toe als ze nog niet in localStorage staan
+(function initializeDefaultBooks() {
+    const defaultBooks = [
+        { title: "De Opperdemon", about: "", emoji: "😈", totalWords: 102818, totalChapters: 36 },
+        { title: "Not A Typical Ghost Story", about: "", emoji: "👻", totalWords: 7045, totalChapters: 4 },
+        { title: "The King and Her Queen", about: "", emoji: "👑", totalWords: 85106, totalChapters: 27 }
+    ];
+    let books = JSON.parse(localStorage.getItem('books') || '[]');
+    const existingTitles = books.map(b => b.title);
+    defaultBooks.forEach(book => {
+        if (!existingTitles.includes(book.title)) {
+            books.push(book);
+        }
+    });
+    localStorage.setItem('books', JSON.stringify(books));
+})();
+
+// In je homepagina-logica (index.html), vervang of breid deze functie uit:
+
+function updateActivityIcons() {
+    const iconsDiv = document.querySelector('.activity-icons');
+    iconsDiv.innerHTML = ''; // eerst leegmaken
+
+    tracker.books.forEach(book => {
+        const span = document.createElement('span');
+        span.textContent = book.emoji; // toon de emoji direct als tekst
+        span.title = book.title;
+        span.style.fontSize = '28px'; // maak emoji wat groter
+        span.style.margin = '0 6px';
+        iconsDiv.appendChild(span);
+    });
+}
+
+updateActivityIcons();
