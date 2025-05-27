@@ -1,4 +1,21 @@
-// --- Classes (gebruik je eigen modules als je met import/export werkt) ---
+// ====== Voeg standaardboeken toe als ze nog niet bestaan ======
+(function initializeDefaultBooks() {
+    const defaultBooks = [
+        { title: "De Opperdemon", about: "", emoji: "😈", totalWords: 102818, totalChapters: 36 },
+        { title: "Not A Typical Ghost Story", about: "", emoji: "👻", totalWords: 7045, totalChapters: 4 },
+        { title: "The King and Her Queen", about: "", emoji: "👑", totalWords: 85106, totalChapters: 27 }
+    ];
+    let books = JSON.parse(localStorage.getItem('books') || '[]');
+    const existingTitles = books.map(b => b.title);
+    defaultBooks.forEach(book => {
+        if (!existingTitles.includes(book.title)) {
+            books.push(book);
+        }
+    });
+    localStorage.setItem('books', JSON.stringify(books));
+})();
+
+// ====== Book class ======
 class Book {
     constructor(title, about, emoji) {
         this.title = title;
@@ -13,6 +30,7 @@ class Book {
     }
 }
 
+// ====== WritingLog class ======
 class WritingLog {
     constructor(date, book, words, chapters) {
         this.date = date;
@@ -22,6 +40,7 @@ class WritingLog {
     }
 }
 
+// ====== Tracker class ======
 class Tracker {
     constructor() {
         this.books = [];
@@ -33,7 +52,6 @@ class Tracker {
     addBook(title, description, emoji) {
         const book = new Book(title, description, emoji);
         this.books.push(book);
-
         // Save to localStorage
         const books = JSON.parse(localStorage.getItem('books')) || [];
         books.push({ title, about: description, emoji, totalWords: 0, totalChapters: 0 });
@@ -42,6 +60,7 @@ class Tracker {
 
     loadBooks() {
         const savedBooks = JSON.parse(localStorage.getItem('books')) || [];
+        this.books = [];
         savedBooks.forEach(bookData => {
             const book = new Book(bookData.title, bookData.about, bookData.emoji);
             book.totalWords = bookData.totalWords || 0;
@@ -54,13 +73,17 @@ class Tracker {
         const book = this.books.find(b => b.title === bookTitle);
         if (book) {
             book.addWriting(words, chapters);
+            // Vervang log voor deze dag en dit boek (maar meestal is er maar één log per dag)
+            this.logs = this.logs.filter(l => !(l.date === date && l.book.title === bookTitle));
             const log = new WritingLog(date, book, words, chapters);
             this.logs.push(log);
 
             // Save logs to localStorage
             const savedLogs = JSON.parse(localStorage.getItem('writingLogs')) || [];
-            savedLogs.push({ date, bookTitle, words, chapters });
-            localStorage.setItem('writingLogs', JSON.stringify(savedLogs));
+            // Vervang bestaande log voor deze dag en dit boek
+            const filteredLogs = savedLogs.filter(l => !(l.date === date && l.bookTitle === bookTitle));
+            filteredLogs.push({ date, bookTitle, words, chapters });
+            localStorage.setItem('writingLogs', JSON.stringify(filteredLogs));
 
             // Update book in localStorage
             const books = JSON.parse(localStorage.getItem('books')) || [];
@@ -77,6 +100,7 @@ class Tracker {
 
     loadLogs() {
         const savedLogs = JSON.parse(localStorage.getItem('writingLogs')) || [];
+        this.logs = [];
         savedLogs.forEach(logData => {
             const book = this.books.find(b => b.title === logData.bookTitle);
             if (book) {
@@ -116,7 +140,7 @@ class Tracker {
     }
 }
 
-// --- Helper functies ---
+// ====== Helper functies ======
 function getTodayStr() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -128,13 +152,14 @@ function getDaysInMonth(year, month) {
     return new Date(year, month+1, 0).getDate();
 }
 
-// --- Tracker instantie ---
+// ====== Tracker instantie ======
 const tracker = new Tracker();
 
-// --- PAGINA-DETECTIE ---
+// ====== PAGINA-DETECTIE ======
 const path = window.location.pathname;
+
+// ---------------- HOME ----------------
 if (path.includes('index.html') || path.endsWith('/')) {
-    // ---------------- HOME ----------------
     // Kalender logica
     const monthSelect = document.querySelector('.month-selector select:nth-child(1)');
     const yearSelect = document.querySelector('.month-selector select:nth-child(2)');
@@ -180,49 +205,41 @@ if (path.includes('index.html') || path.endsWith('/')) {
         const topBook = tracker.getTopBook(monthStr);
         const bookDiv = document.querySelector('.book-of-the-month .book-info');
         if (topBook) {
-            // Zoek emoji bij boek
             const book = tracker.books.find(b => b.title === topBook.title);
-            if (bookDiv.querySelector('img')) {
-                bookDiv.querySelector('img').alt = book.title;
-                // Je kunt hier eventueel een mapping naar plaatje doen als je wilt
+            // Emoji tonen als grote emoji (ipv afbeelding)
+            let emojiSpan = bookDiv.querySelector('.emoji');
+            if (!emojiSpan) {
+                emojiSpan = document.createElement('span');
+                emojiSpan.className = 'emoji';
+                emojiSpan.style.fontSize = '40px';
+                emojiSpan.style.marginRight = '10px';
+                bookDiv.insertBefore(emojiSpan, bookDiv.firstChild);
             }
+            emojiSpan.textContent = book.emoji;
             bookDiv.querySelector('.stats').innerHTML =
                 `${topBook.words} words written<br>` +
                 `${topBook.chapters} chapters written<br>` +
                 `${tracker.logs.filter(l => l.book.title === topBook.title && l.date.startsWith(monthStr)).length} days of writing`;
+            if (bookDiv.querySelector('img')) bookDiv.querySelector('img').style.display = 'none';
         } else {
             bookDiv.querySelector('.stats').innerHTML = "No writing this month";
+            if (bookDiv.querySelector('.emoji')) bookDiv.querySelector('.emoji').textContent = '';
         }
     }
     updateBookOfTheMonth();
 
-    // Activity icons
+    // Activity icons (emoji's)
     function updateActivityIcons() {
         const iconsDiv = document.querySelector('.activity-icons');
+        if (!iconsDiv) return;
         iconsDiv.innerHTML = '';
         tracker.books.forEach(book => {
-            const btn = document.createElement('img');
-            btn.alt = book.title;
-            // Gebruik eventueel eigen mapping naar plaatje, anders emoji als fallback
-            if (book.emoji.startsWith('<img')) {
-                btn.src = book.emoji;
-            } else if (book.title.toLowerCase() === "wolf") {
-                btn.src = "Images/wolf.png";
-            } else if (book.title.toLowerCase() === "demon") {
-                btn.src = "Images/demon.png";
-            } else if (book.title.toLowerCase() === "drop") {
-                btn.src = "Images/drop.png";
-            } else if (book.title.toLowerCase() === "ghost") {
-                btn.src = "Images/ghost.png";
-            } else if (book.title.toLowerCase() === "dream") {
-                btn.src = "Images/sleeping.png";
-            } else if (book.title.toLowerCase() === "crown") {
-                btn.src = "Images/crown.png";
-            } else {
-                // emoji als fallback
-                btn.src = `https://emojiapi.dev/api/v1/${encodeURIComponent(book.emoji)}/64.png`;
-            }
-            iconsDiv.appendChild(btn);
+            const span = document.createElement('span');
+            span.textContent = book.emoji;
+            span.title = book.title;
+            span.style.fontSize = '28px';
+            span.style.margin = '0 6px';
+            iconsDiv.appendChild(span);
         });
     }
     updateActivityIcons();
@@ -241,80 +258,87 @@ if (path.includes('index.html') || path.endsWith('/')) {
 
     // Weekly writing progress
     function updateWeeklyWriting() {
-    // Bepaal huidige week (zondag t/m zaterdag)
-    const now = new Date();
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay()); // Zondag als start
+        // Bepaal huidige week (zondag t/m zaterdag)
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - weekStart.getDay()); // Zondag als start
 
-    let daysWritten = 0;
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(weekStart);
-        d.setDate(weekStart.getDate() + i);
-        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        if (tracker.logs.some(log => log.date === dateStr)) daysWritten++;
+        let daysWritten = 0;
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(weekStart);
+            d.setDate(weekStart.getDate() + i);
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            if (tracker.logs.some(log => log.date === dateStr)) daysWritten++;
+        }
+
+        // Update de progressbalk
+        const fillDiv = document.querySelector('.progress-bar .fill');
+        if (fillDiv) fillDiv.style.width = `${(daysWritten/7)*100}%`;
+
+        // Update de tekst eronder
+        const progressText = document.querySelector('.weekly-writing > div:last-child');
+        if (progressText) progressText.textContent = `${daysWritten}/7 days`;
     }
-
-    // Update de progressbalk
-    const fillDiv = document.querySelector('.progress-bar .fill');
-    if (fillDiv) fillDiv.style.width = `${(daysWritten/7)*100}%`;
-
-    // Update de tekst eronder
-    const progressText = document.querySelector('.weekly-writing > div:last-child');
-    if (progressText) progressText.textContent = `${daysWritten}/7 days`;
-}
     updateWeeklyWriting();
 
-} else if (path.includes('vandaag.html')) {
-    // ---------------- VANDAAG ----------------
+}
+
+// ---------------- VANDAAG ----------------
+else if (path.includes('vandaag.html')) {
     // Haal datum uit URL
     const params = new URLSearchParams(window.location.search);
     const dateStr = params.get('date') || getTodayStr();
 
-    // Chapters dropdown vullen (bijv. 1 t/m 20)
+    // Chapters dropdown vullen (bijv. 1 t/m 50)
     const chaptersSelect = document.getElementById('chapters');
-    chaptersSelect.innerHTML = '<option value="">Select chapter</option>';
-    for (let i = 1; i <= 20; i++) {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = i;
-        chaptersSelect.appendChild(opt);
+    if (chaptersSelect) {
+        chaptersSelect.innerHTML = '<option value="">Select chapter</option>';
+        for (let i = 1; i <= 50; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = i;
+            chaptersSelect.appendChild(opt);
+        }
     }
 
-    // Dynamische boeken/emoji's tonen
+    // Dynamische boeken/emoji's tonen als knoppen
     const bookIconsDiv = document.querySelector('.book-icons');
-    bookIconsDiv.innerHTML = '';
-    tracker.books.forEach(book => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'book-icon';
-        btn.title = book.title;
-        const img = document.createElement('img');
-        // Mapping naar image
-        if (book.title.toLowerCase() === "wolf") img.src = "Images/wolf.png";
-        else if (book.title.toLowerCase() === "demon") img.src = "Images/demon.png";
-        else if (book.title.toLowerCase() === "drop") img.src = "Images/drop.png";
-        else if (book.title.toLowerCase() === "ghost") img.src = "Images/ghost.png";
-        else if (book.title.toLowerCase() === "dream") img.src = "Images/sleeping.png";
-        else if (book.title.toLowerCase() === "crown") img.src = "Images/crown.png";
-        else img.src = `https://emojiapi.dev/api/v1/${encodeURIComponent(book.emoji)}/64.png`;
-        img.alt = book.title;
-        btn.appendChild(img);
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.book-icon').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
+    if (bookIconsDiv) {
+        bookIconsDiv.innerHTML = '';
+        tracker.books.forEach((book, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'book-icon';
+            btn.title = book.title;
+            btn.textContent = book.emoji; // Gebruik echte emoji
+            btn.style.fontSize = '32px';
+            btn.style.backgroundColor = '#fff';
+            btn.style.borderRadius = '5px';
+            btn.style.cursor = 'pointer';
+            btn.style.border = 'none';
+            btn.style.padding = '10px';
+            btn.style.transition = 'background-color 0.2s';
+
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.book-icon').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+
+            bookIconsDiv.appendChild(btn);
         });
-        bookIconsDiv.appendChild(btn);
-    });
+    }
 
     // Bestaande log voor deze dag invullen
     const log = tracker.logs.find(l => l.date === dateStr);
     if (log) {
         document.getElementById('words').value = log.words;
-        chaptersSelect.value = log.chapters;
+        if (chaptersSelect) chaptersSelect.value = log.chapters;
         // Selecteer juiste boek
-        const idx = tracker.books.findIndex(b => b.title === log.book.title);
-        if (idx !== -1) {
-            bookIconsDiv.children[idx].classList.add('selected');
+        if (bookIconsDiv) {
+            const idx = tracker.books.findIndex(b => b.title === log.book.title);
+            if (idx !== -1 && bookIconsDiv.children[idx]) {
+                bookIconsDiv.children[idx].classList.add('selected');
+            }
         }
     }
 
@@ -322,19 +346,32 @@ if (path.includes('index.html') || path.endsWith('/')) {
     document.querySelector('form').addEventListener('submit', function(e) {
         e.preventDefault();
         const words = parseInt(document.getElementById('words').value) || 0;
-        const chapters = parseInt(chaptersSelect.value) || 0;
-        const selectedBookBtn = document.querySelector('.book-icon.selected');
-        if (!selectedBookBtn) return alert('Selecteer een boek!');
-        const bookTitle = selectedBookBtn.title;
+        const chapters = parseInt(document.getElementById('chapters').value) || 0;
+        const selectedBtn = document.querySelector('.book-icon.selected');
+        if (!selectedBtn) return alert('Selecteer een boek!');
+        const selectedEmoji = selectedBtn.textContent;
+        const selectedBook = tracker.books.find(b => b.emoji === selectedEmoji);
 
         if (words === 0 && chapters === 0) return alert('Vul woorden of hoofdstukken in!');
-        tracker.addWritingLog(dateStr, bookTitle, words, chapters);
-        alert('Opgeslagen!');
+        tracker.addWritingLog(dateStr, selectedBook.title, words, chapters);
+
+        alert(`Opgeslagen voor boek: ${selectedBook.title}`);
         window.location.href = "index.html";
     });
 
-} else if (path.includes('boek.html')) {
-    // ---------------- BOEK ----------------
+    // Extra CSS voor selectie (indien niet in je CSS)
+    const style = document.createElement('style');
+    style.innerHTML = `
+    .book-icon.selected {
+        background-color: #b0d4f1 !important;
+        border: 2px solid #391b4a !important;
+    }
+    `;
+    document.head.appendChild(style);
+}
+
+// ---------------- BOEK ----------------
+else if (path.includes('boek.html')) {
     document.querySelector('form').addEventListener('submit', function(e) {
         e.preventDefault();
         const title = document.getElementById('title').value.trim();
@@ -349,125 +386,3 @@ if (path.includes('index.html') || path.endsWith('/')) {
         window.location.href = "vandaag.html";
     });
 }
-
-// Voeg standaardboeken toe als ze nog niet in localStorage staan
-(function initializeDefaultBooks() {
-    const defaultBooks = [
-        { title: "De Opperdemon", about: "", emoji: "😈", totalWords: 102818, totalChapters: 36 },
-        { title: "Not A Typical Ghost Story", about: "", emoji: "👻", totalWords: 7045, totalChapters: 4 },
-        { title: "The King and Her Queen", about: "", emoji: "👑", totalWords: 85106, totalChapters: 27 }
-    ];
-    let books = JSON.parse(localStorage.getItem('books') || '[]');
-    const existingTitles = books.map(b => b.title);
-    defaultBooks.forEach(book => {
-        if (!existingTitles.includes(book.title)) {
-            books.push(book);
-        }
-    });
-    localStorage.setItem('books', JSON.stringify(books));
-})();
-
-// In je homepagina-logica (index.html), vervang of breid deze functie uit:
-
-function updateActivityIcons() {
-    const iconsDiv = document.querySelector('.activity-icons');
-    iconsDiv.innerHTML = ''; // eerst leegmaken
-
-    tracker.books.forEach(book => {
-        const span = document.createElement('span');
-        span.textContent = book.emoji; // toon de emoji direct als tekst
-        span.title = book.title;
-        span.style.fontSize = '28px'; // maak emoji wat groter
-        span.style.margin = '0 6px';
-        iconsDiv.appendChild(span);
-    });
-}
-
-updateActivityIcons();
-
-// 1. Dynamisch de emoji's tonen als knoppen
-const bookIconsDiv = document.querySelector('.book-icons');
-bookIconsDiv.innerHTML = ''; // Leegmaken
-
-// Haal boeken uit localStorage
-const books = JSON.parse(localStorage.getItem('books')) || [];
-
-books.forEach((book, idx) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'book-icon';
-    btn.title = book.title;
-    btn.innerText = book.emoji;
-    btn.style.fontSize = '32px';
-    btn.style.backgroundColor = '#fff';
-    btn.style.borderRadius = '5px';
-    btn.style.cursor = 'pointer';
-    btn.style.border = 'none';
-    btn.style.padding = '10px';
-    btn.style.transition = 'background-color 0.2s';
-
-    btn.addEventListener('click', () => {
-        // Deselecteer alle andere
-        document.querySelectorAll('.book-icon').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-    });
-
-    bookIconsDiv.appendChild(btn);
-});
-
-// 2. Stijl de geselecteerde emoji (bijv. met CSS)
-const style = document.createElement('style');
-style.innerHTML = `
-.book-icon.selected {
-    background-color: #b0d4f1 !important;
-    border: 2px solid #391b4a !important;
-}
-`;
-document.head.appendChild(style);
-
-// 3. Bij opslaan: haal de geselecteerde emoji op
-document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const selectedBtn = document.querySelector('.book-icon.selected');
-    if (!selectedBtn) return alert('Selecteer een boek!');
-    const selectedEmoji = selectedBtn.innerText;
-    const selectedBook = books.find(b => b.emoji === selectedEmoji);
-
-    // Lees hoofdstukken en woorden uit
-    const chapters = parseInt(document.getElementById('chapters').value) || 0;
-    const words = parseInt(document.getElementById('words').value) || 0;
-
-    // Sla log op (gebruik je eigen logica hier)
-    // Voorbeeld:
-    // tracker.addWritingLog(dateStr, selectedBook.title, words, chapters);
-
-    alert(`Opgeslagen voor boek: ${selectedBook.title}`);
-    window.location.href = "index.html";
-});
-
-const bookIconsDiv = document.querySelector('.book-icons');
-bookIconsDiv.innerHTML = ''; // Leegmaken
-
-const books = JSON.parse(localStorage.getItem('books')) || [];
-
-books.forEach((book) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'book-icon';
-    btn.textContent = book.emoji; // Zet de emoji direct als tekst
-    btn.title = book.title;
-    btn.style.fontSize = '32px';
-    btn.style.backgroundColor = '#fff';
-    btn.style.borderRadius = '5px';
-    btn.style.cursor = 'pointer';
-    btn.style.border = 'none';
-    btn.style.padding = '10px';
-    btn.style.transition = 'background-color 0.2s';
-
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.book-icon').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-    });
-
-    bookIconsDiv.appendChild(btn);
-}); 
