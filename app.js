@@ -376,3 +376,63 @@ function updateActivityIcons() {
 }
 
 updateActivityIcons();
+
+// 1. Dynamisch de emoji's tonen als knoppen
+const bookIconsDiv = document.querySelector('.book-icons');
+bookIconsDiv.innerHTML = ''; // Leegmaken
+
+// Haal boeken uit localStorage
+const books = JSON.parse(localStorage.getItem('books')) || [];
+
+books.forEach((book, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'book-icon';
+    btn.title = book.title;
+    btn.innerText = book.emoji;
+    btn.style.fontSize = '32px';
+    btn.style.backgroundColor = '#fff';
+    btn.style.borderRadius = '5px';
+    btn.style.cursor = 'pointer';
+    btn.style.border = 'none';
+    btn.style.padding = '10px';
+    btn.style.transition = 'background-color 0.2s';
+
+    btn.addEventListener('click', () => {
+        // Deselecteer alle andere
+        document.querySelectorAll('.book-icon').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+    });
+
+    bookIconsDiv.appendChild(btn);
+});
+
+// 2. Stijl de geselecteerde emoji (bijv. met CSS)
+const style = document.createElement('style');
+style.innerHTML = `
+.book-icon.selected {
+    background-color: #b0d4f1 !important;
+    border: 2px solid #391b4a !important;
+}
+`;
+document.head.appendChild(style);
+
+// 3. Bij opslaan: haal de geselecteerde emoji op
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const selectedBtn = document.querySelector('.book-icon.selected');
+    if (!selectedBtn) return alert('Selecteer een boek!');
+    const selectedEmoji = selectedBtn.innerText;
+    const selectedBook = books.find(b => b.emoji === selectedEmoji);
+
+    // Lees hoofdstukken en woorden uit
+    const chapters = parseInt(document.getElementById('chapters').value) || 0;
+    const words = parseInt(document.getElementById('words').value) || 0;
+
+    // Sla log op (gebruik je eigen logica hier)
+    // Voorbeeld:
+    // tracker.addWritingLog(dateStr, selectedBook.title, words, chapters);
+
+    alert(`Opgeslagen voor boek: ${selectedBook.title}`);
+    window.location.href = "index.html";
+});
