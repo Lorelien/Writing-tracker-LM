@@ -436,3 +436,48 @@ document.querySelector('form').addEventListener('submit', function(e) {
     alert(`Opgeslagen voor boek: ${selectedBook.title}`);
     window.location.href = "index.html";
 });
+
+const bookIconsDiv = document.querySelector('.book-icons');
+bookIconsDiv.innerHTML = ''; // Leegmaken
+
+const books = JSON.parse(localStorage.getItem('books')) || [];
+
+books.forEach((book) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'book-icon';
+    btn.textContent = book.emoji; // Zet de emoji direct als tekst
+    btn.title = book.title;
+    btn.style.fontSize = '32px';
+    btn.style.backgroundColor = '#fff';
+    btn.style.borderRadius = '5px';
+    btn.style.cursor = 'pointer';
+    btn.style.border = 'none';
+    btn.style.padding = '10px';
+    btn.style.transition = 'background-color 0.2s';
+
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.book-icon').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+    });
+
+    bookIconsDiv.appendChild(btn);
+}); 
+
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const selectedBtn = document.querySelector('.book-icon.selected');
+    if (!selectedBtn) return alert('Selecteer een boek!');
+    const selectedEmoji = selectedBtn.textContent;
+    const selectedBook = books.find(b => b.emoji === selectedEmoji);
+
+    // Haal hoofdstukken en woorden op
+    const chapters = parseInt(document.getElementById('chapters').value) || 0;
+    const words = parseInt(document.getElementById('words').value) || 0;
+
+    // Sla log op (gebruik je eigen logica hier)
+    // tracker.addWritingLog(dateStr, selectedBook.title, words, chapters);
+
+    alert(`Opgeslagen voor boek: ${selectedBook.title}`);
+    window.location.href = "index.html";
+});

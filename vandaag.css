@@ -115,3 +115,8 @@
     color: #fff;
     font-weight: bold;
 }
+
+.book-icon.selected {
+    background-color: #b0d4f1 !important;
+    border: 2px solid #391b4a !important;
+}
