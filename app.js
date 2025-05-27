@@ -92,3 +92,26 @@ if (window.location.pathname.includes('index.html')) {
         totalChaptersElement.textContent = totalChapters;
     });
 }
+
+function generateCalendar(month, year) {
+    const daysContainer = document.querySelector('.days');
+    daysContainer.innerHTML = ''; // Wis bestaande dagen
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+        const dayElement = document.createElement('div');
+        dayElement.textContent = day;
+        daysContainer.appendChild(dayElement);
+    }
+}
+
+document.querySelector('.month-selector select:nth-child(1)').addEventListener('change', function() {
+    const month = this.selectedIndex;
+    const year = document.querySelector('.month-selector select:nth-child(2)').value;
+    generateCalendar(month, year);
+});
+
+
+
