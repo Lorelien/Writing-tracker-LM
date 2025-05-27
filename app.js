@@ -113,5 +113,23 @@ document.querySelector('.month-selector select:nth-child(1)').addEventListener('
     generateCalendar(month, year);
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const days = document.querySelectorAll(".days div");
 
+    days.forEach(day => {
+        day.addEventListener("click", function () {
+            const selectedDay = this.textContent; // Haal de dag uit de klik
+            window.location.href = `vandaag.html?day=${selectedDay}`; // Stuur naar vandaag.html met parameter
+        });
+    });
+}); 
+
+document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    const selectedDay = params.get("day");
+
+    if (selectedDay) {
+        document.querySelector("h2").innerHTML = `&lt; Today - ${selectedDay}`;
+    }
+});
 
