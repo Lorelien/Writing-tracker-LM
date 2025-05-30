@@ -435,3 +435,29 @@ if (path.includes('boek.html')) {
         window.location.href = "vandaag.html";
     });
 }
+
+// Automatisch de huidige maand en jaar selecteren bij laden van de pagina
+window.addEventListener('DOMContentLoaded', function() {
+    // Selecteer de juiste dropdowns
+    const monthSelect = document.querySelector('.month-selector select:nth-child(1)');
+    const yearSelect = document.querySelector('.month-selector select:nth-child(2)');
+    if (!monthSelect || !yearSelect) return;
+
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0 = januari
+    const currentYear = now.getFullYear();
+
+    // Zet de geselecteerde maand
+    monthSelect.selectedIndex = currentMonth;
+
+    // Zoek de juiste optie voor het huidige jaar en selecteer deze
+    for (let i = 0; i < yearSelect.options.length; i++) {
+        if (parseInt(yearSelect.options[i].textContent) === currentYear) {
+            yearSelect.selectedIndex = i;
+            break;
+        }
+    }
+
+    // Kalender direct updaten
+    if (typeof updateCalendar === "function") updateCalendar();
+});
