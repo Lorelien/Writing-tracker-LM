@@ -258,28 +258,34 @@ if (path.includes('index.html') || path.endsWith('/')) {
 
     // Weekly writing progress
     function updateWeeklyWriting() {
-        // Bepaal huidige week (zondag t/m zaterdag)
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - weekStart.getDay()); // Zondag als start
+    // Huidige dag en weekberekening (zondag = 0)
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setHours(0,0,0,0);
+    weekStart.setDate(now.getDate() - now.getDay()); // Zondag
 
-        let daysWritten = 0;
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(weekStart);
-            d.setDate(weekStart.getDate() + i);
-            const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            if (tracker.logs.some(log => log.date === dateStr)) daysWritten++;
+    // Verzamel alle unieke dagen waarop geschreven is deze week
+    const writtenDays = new Set();
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + i);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        // Kijk of er een log is voor deze dag
+        if (tracker.logs.some(log => log.date === dateStr)) {
+            writtenDays.add(dateStr);
         }
-
-        // Update de progressbalk
-        const fillDiv = document.querySelector('.progress-bar .fill');
-        if (fillDiv) fillDiv.style.width = `${(daysWritten/7)*100}%`;
-
-        // Update de tekst eronder
-        const progressText = document.querySelector('.weekly-writing > div:last-child');
-        if (progressText) progressText.textContent = `${daysWritten}/7 days`;
     }
-    updateWeeklyWriting();
+
+    const daysWritten = writtenDays.size;
+
+    // Update de progressbalk
+    const fillDiv = document.querySelector('.progress-bar .fill');
+    if (fillDiv) fillDiv.style.width = `${(daysWritten/7)*100}%`;
+
+    // Update de tekst eronder
+    const progressText = document.querySelector('.weekly-writing > div:last-child');
+    if (progressText) progressText.textContent = `${daysWritten}/7 days`;
+}
 
 }
 
